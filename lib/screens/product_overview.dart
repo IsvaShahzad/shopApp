@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../widgets/products_grid.dart';
 import '../widgets/badge.dart';
 import '../providers/cart.dart';
+import '../providers/products_provider.dart';
 
 
 enum FilterOptions //ways of assigning integers to labels
@@ -22,6 +23,40 @@ class ProductOverviewScreen extends StatefulWidget {
 class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
 
   var _showOnlyFavourites = false;
+  var _isInit = true;
+  var _isLoading =false;
+
+//   @override
+//   void initState(){
+//
+//   // Provider.of<Products>(context).fetchandSetProducts();  THIS WONT WORK, CONTEXT DOESNT WORK INSIDE INIT STATE
+//   super.initState();
+// }
+
+@override
+void didChangeDependencies()
+ {
+  if(_isInit){
+    setState((){
+      _isLoading=true;
+
+    });
+    Provider.of<Products>(context).fetchandSetProducts().then((_)
+    // context.read<Products>().fetchandSetProducts();
+    {
+      setState((){
+        _isLoading=false;
+
+      });
+    }
+    );
+  }
+  _isInit=false;
+  super.didChangeDependencies();
+}
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,7 +109,9 @@ class _ProductOverviewScreenState extends State<ProductOverviewScreen> {
         ],
       ),
       drawer: AppDrawer(),
-      body: ProductsGrid(_showOnlyFavourites),
+      body: _isLoading ? Center(
+        child:  CircularProgressIndicator(),
+      ): ProductsGrid(_showOnlyFavourites),
     );
   }
 }
